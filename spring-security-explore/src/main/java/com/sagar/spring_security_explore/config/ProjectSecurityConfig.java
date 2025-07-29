@@ -16,15 +16,10 @@ public class ProjectSecurityConfig {
                 .authorizeHttpRequests(requests -> requests
                         .requestMatchers("/api/v1/userProfile", "/api/v1/userSecureGroup").authenticated()
                         .requestMatchers("/api/v1/userContact", "/api/v1/userNotes", "/error").permitAll()
-                        .anyRequest().permitAll() // Allow all other requests
                 )
-                .formLogin(AbstractHttpConfigurer::disable) // Enable form-based login using withDefaults()
-                .httpBasic(withDefaults()) // Enable HTTP Basic authentication using withDefaults()
-                .logout(logout -> logout
-                        .logoutUrl("/api/v1/logout") // Custom logout URL
-                        .logoutSuccessUrl("/api/v1/welcome") // Redirect after logout
-                        .permitAll()); // Allow everyone to access the logout URL
-
+                .formLogin(withDefaults())
+                .httpBasic(withDefaults());
+        
         return http.build();
     }
 }
