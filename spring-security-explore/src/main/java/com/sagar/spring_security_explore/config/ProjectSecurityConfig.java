@@ -13,13 +13,16 @@ public class ProjectSecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            .authorizeHttpRequests(requests -> requests
-                .requestMatchers("/api/v1/userProfile", "/api/v1/userSecureGroup").authenticated()
-                .requestMatchers("/api/v1/userContact", "/api/v1/userNotes").permitAll()
-                .anyRequest().permitAll() // Allow all other requests (e.g., your WelcomeController)
-            )
-            .formLogin(withDefaults()) // Use withDefaults() instead of deprecated formLogin()
-            .httpBasic(withDefaults());
+                .authorizeHttpRequests(requests -> requests
+                        .requestMatchers("/api/v1/userProfile", "/api/v1/userSecureGroup").authenticated()
+                        .requestMatchers("/api/v1/userContact", "/api/v1/userNotes", "/error").permitAll()
+                )
+                .formLogin(withDefaults()) // Enables form-based login
+                .logout(logout -> logout
+                        .logoutUrl("/api/v1/logout") // Custom logout URL
+                        .logoutSuccessUrl("/api/v1/welcome") // Redirect after logout
+                        .permitAll()); // Allow everyone to access the logout URL
+
         return http.build();
     }
 }
