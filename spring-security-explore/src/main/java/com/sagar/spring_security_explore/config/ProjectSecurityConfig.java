@@ -3,10 +3,8 @@ package com.sagar.spring_security_explore.config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
-
-import static org.springframework.security.authorization.AuthenticatedAuthorizationManager.authenticated;
-import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
 public class ProjectSecurityConfig {
@@ -17,7 +15,7 @@ public class ProjectSecurityConfig {
                         .requestMatchers("/api/v1/userProfile", "/api/v1/userSecureGroup").authenticated()
                         .requestMatchers("/api/v1/userContact", "/api/v1/userNotes", "/error").permitAll()
                 )
-                .formLogin(withDefaults()) // Enables form-based login
+                .formLogin(AbstractHttpConfigurer::disable) // Enables form-based login
                 .logout(logout -> logout
                         .logoutUrl("/api/v1/logout") // Custom logout URL
                         .logoutSuccessUrl("/api/v1/welcome") // Redirect after logout
