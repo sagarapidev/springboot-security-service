@@ -35,11 +35,11 @@ public class ProjectSecurityConfig {
     public UserDetailsService userDetailsService() {
         UserDetails admin =
                 User.withUsername("admin")
-                        .password("{bcrypt}$2a$12$7SRgVdUdXqQfjw4FlTQDcemFdDvEs7kbdb38GEw8vTk0W/9dwPRby") // bcrypt encoded password for "admin")
+                        .password("{bcrypt}$2a$12$/7s6SS1mQ/4bq370/IqZt.WNKjHIyweJNOsye1ip4T2000iy5pHSe")
                         .authorities("admin")
                         .build();
         UserDetails user = User.withUsername("user")
-                .password("user")
+                .password("{noop}user")
                 .authorities("read")
                 .build();
 
@@ -50,9 +50,9 @@ public class ProjectSecurityConfig {
     public PasswordEncoder passwordEncoder() {
         return PasswordEncoderFactories.createDelegatingPasswordEncoder();
     }
-
-    @Bean
-    public CompromisedPasswordChecker compromisedPasswordChecker() {
-        return new HaveIBeenPwnedRestApiPasswordChecker();
-    }
+//
+//    @Bean
+//    public CompromisedPasswordChecker compromisedPasswordChecker() {
+//        return new HaveIBeenPwnedRestApiPasswordChecker();
+//    }
 }
