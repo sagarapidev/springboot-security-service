@@ -1,4 +1,4 @@
-package com.sagar.spring_security_explore;
+package com.sagar.spring_security_explore.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -6,16 +6,14 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
-public class SecurityConfig {
+public class ProjectSecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(auths -> auths
-                        .requestMatchers("/api/v1/welcome")
-                        .permitAll()
-                        .anyRequest().authenticated()
-                )
-                .formLogin(form -> form.defaultSuccessUrl("/api/v1/welcome", true));
+                        .anyRequest()
+                        .authenticated()
+                );
         return http.build();
     }
 }
