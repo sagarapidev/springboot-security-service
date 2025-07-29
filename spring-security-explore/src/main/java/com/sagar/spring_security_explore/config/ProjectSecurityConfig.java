@@ -6,6 +6,8 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
 
+import static org.springframework.security.config.Customizer.withDefaults;
+
 @Configuration
 public class ProjectSecurityConfig {
     @Bean
@@ -14,8 +16,10 @@ public class ProjectSecurityConfig {
                 .authorizeHttpRequests(requests -> requests
                         .requestMatchers("/api/v1/userProfile", "/api/v1/userSecureGroup").authenticated()
                         .requestMatchers("/api/v1/userContact", "/api/v1/userNotes", "/error").permitAll()
+                        .anyRequest().permitAll() // Allow all other requests
                 )
-                .formLogin(AbstractHttpConfigurer::disable) // Enables form-based login
+                .formLogin(AbstractHttpConfigurer::disable) // Enable form-based login using withDefaults()
+                .httpBasic(withDefaults()) // Enable HTTP Basic authentication using withDefaults()
                 .logout(logout -> logout
                         .logoutUrl("/api/v1/logout") // Custom logout URL
                         .logoutSuccessUrl("/api/v1/welcome") // Redirect after logout
