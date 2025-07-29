@@ -8,7 +8,6 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
-import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
@@ -23,7 +22,7 @@ public class ProjectSecurityConfig {
         http
                 .authorizeHttpRequests(requests -> requests
                         .requestMatchers("/api/v1/userProfile", "/api/v1/userSecureGroup").authenticated()
-                        .requestMatchers("/api/v1/userContact", "/api/v1/userNotes", "/error").permitAll()
+                        .requestMatchers("/api/v1/userContact", "/api/v1/userNotes", "/error", "/api/v1/", "/api/v1/welcome").permitAll()
                 )
                 .formLogin(withDefaults())
                 .httpBasic(withDefaults());
@@ -35,7 +34,7 @@ public class ProjectSecurityConfig {
     public UserDetailsService userDetailsService() {
         UserDetails admin =
                 User.withUsername("admin")
-                        .password("{bcrypt}$2a$12$/7s6SS1mQ/4bq370/IqZt.WNKjHIyweJNOsye1ip4T2000iy5pHSe")
+                        .password("{bcrypt}$2b$12$e2KevoKygr30U6IzVwdkVOjGF57BRIhsx8AxPLAIvz5lg3SyyRZ6O")
                         .authorities("admin")
                         .build();
         UserDetails user = User.withUsername("user")
@@ -50,7 +49,7 @@ public class ProjectSecurityConfig {
     public PasswordEncoder passwordEncoder() {
         return PasswordEncoderFactories.createDelegatingPasswordEncoder();
     }
-//
+
 //    @Bean
 //    public CompromisedPasswordChecker compromisedPasswordChecker() {
 //        return new HaveIBeenPwnedRestApiPasswordChecker();
