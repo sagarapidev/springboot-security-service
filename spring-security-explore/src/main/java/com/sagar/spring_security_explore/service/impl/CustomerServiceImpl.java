@@ -11,13 +11,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-
+@Slf4j
 @Service
 public class CustomerServiceImpl implements ICustomerService {
+
     @Autowired
     private CustomerRepository customerRepository;
 
@@ -30,13 +33,16 @@ public class CustomerServiceImpl implements ICustomerService {
     @Transactional
     @Override
     public CustomerPostResponse createCustomer(CustomerPostRequest request) {
+        log.info("Creating customer: {}", request);
         Customer customer = CustomerPostRequest.toEntity(request, passwordEncoder);
         Customer saved = customerRepository.save(customer);
+        log.info("Customer created with ID: {}", saved.getId());
         return CustomerPostResponse.fromEntity(saved);
     }
 
     @Override
     public CustomerGetResponseDto getCustomerById(Long id) {
+        log.debug("Fetching customer by ID: {}", id);
         return customerRepository.findById(id)
                 .map(CustomerServiceImpl::fromEntity)
                 .orElseThrow(() -> new com.sagar.spring_security_explore.exception.NotFoundException("Customer not found with id: " + id));
@@ -44,6 +50,7 @@ public class CustomerServiceImpl implements ICustomerService {
 
     @Override
     public List<CustomerGetResponseDto> getAllCustomers() {
+        log.debug("Fetching all customers");
         return customerRepository.findAll().stream()
                 .map(CustomerServiceImpl::fromEntity)
                 .collect(Collectors.toList());
