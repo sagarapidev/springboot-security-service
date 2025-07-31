@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Data
 @NoArgsConstructor
@@ -28,12 +29,16 @@ public class CustomerPostRequest {
     @Size(max = 50, message = ValidationMessage.ROLE_MAX)
     String role;
 
-    public static Customer toEntity(CustomerPostRequest dto, BCryptPasswordEncoder encoder) {
+    @NotBlank(message = ValidationMessage.PASSWORD_HASH_REQUIRED)
+    @Size(max = 100, message = ValidationMessage.PASSWORD_HASH_MAX)
+    String password; // This should be the raw password, not the hash
+
+    public static Customer toEntity(CustomerPostRequest dto, PasswordEncoder encoder) {
         Customer customer = new Customer();
         customer.setName(dto.getName());
         customer.setEmail(dto.getEmail());
         customer.setRole(dto.getRole());
-        customer.setHashPwd(encoder.encode(dto.getEmail())); // Replace with password in real app
+        customer.setHashPwd(encoder.encode(dto.password)); // Replace with password in real app
         return customer;
     }
 }

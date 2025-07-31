@@ -7,23 +7,26 @@ import com.sagar.spring_security_explore.entity.Customer;
 import com.sagar.spring_security_explore.repository.CustomerRepository;
 import com.sagar.spring_security_explore.service.ICustomerService;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class CustomerServiceImpl implements ICustomerService {
 
     @Autowired
     private CustomerRepository customerRepository;
 
-    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    private final PasswordEncoder passwordEncoder;
 
     private static CustomerGetResponseDto fromEntity(Customer customer) {
         return CustomerGetResponseDto.fromEntity(customer);
@@ -33,9 +36,18 @@ public class CustomerServiceImpl implements ICustomerService {
     @Override
     public CustomerPostResponse createCustomer(CustomerPostRequest request) {
         log.info("Creating customer: {}", request);
+
+        Optional<Customer> existingCustomer = customerRepository.findByEmail(request.getEmail());
+        if (existingCustomer.isPresent()) {
+            log.warn("Customer with email already exists: {}", request.getEmail());
+            // Respond with existing customer info or a custom message
+            throw new IllegalArgumentException("Customer with email already exists: " + request.getEmail());
+        }
+
         Customer customer = CustomerPostRequest.toEntity(request, passwordEncoder);
         Customer saved = customerRepository.save(customer);
         log.info("Customer created with ID: {}", saved.getId());
+
         return CustomerPostResponse.fromEntity(saved);
     }
 
