@@ -7,6 +7,14 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class StartupLinksLoggerConfig implements ApplicationListener<ApplicationReadyEvent> {
+
+
+    /**
+     * Logs useful links to the console when the application is ready.
+     * This includes Swagger UI and application home links.
+     *
+     * @param event the ApplicationReadyEvent
+     */
     @Override
     public void onApplicationEvent(ApplicationReadyEvent event) {
         Environment env = event.getApplicationContext().getEnvironment();
