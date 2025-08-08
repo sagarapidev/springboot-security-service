@@ -19,9 +19,9 @@ public class ProjectProdSecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .requiresChannel(channel -> channel
-                        .anyRequest().requiresSecure() // Enforce HTTPS
-                )
+//                .requiresChannel(channel -> channel
+//                        .anyRequest().requiresSecure() // Enforce HTTPS
+//                )
 
                 .authorizeHttpRequests(requests -> requests
                         .requestMatchers("/api/v1/userProfile", "/api/v1/userSecureGroup").authenticated()
