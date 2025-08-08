@@ -10,7 +10,7 @@ import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.util.matcher.RequestMatcher;
-
+import org.springframework.web.cors.CorsConfiguration;
 import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
@@ -19,21 +19,10 @@ public class ProjectProdSecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-//                .requiresChannel(channel -> channel
-//                        .anyRequest().requiresSecure() // Enforce HTTPS
-//                )
-
                 .authorizeHttpRequests(requests -> requests
-                        .requestMatchers("/api/v1/userProfile", "/api/v1/userSecureGroup").authenticated()
+                        .requestMatchers("/api/admin/**").authenticated()
                         .requestMatchers(
-                                "/api/customers",
                                 "/api/customers/**",
-                                "/api/v1/userContact",
-                                "/api/v1/userNotes",
-                                "/error",
-                                "/api/v1/",
-                                "/api/v1/welcome",
-                                "/sw",
                                 "/swagger-ui.html",
                                 "/swagger-ui/**",
                                 "/v3/api-docs",
@@ -44,23 +33,26 @@ public class ProjectProdSecurityConfig {
                 )
                 .formLogin(withDefaults())
                 .httpBasic(withDefaults())
-                .csrf(AbstractHttpConfigurer::disable);
+                .csrf(AbstractHttpConfigurer::disable)
+                .cors(corsConfig-> corsConfig
+                        .configurationSource(request -> {
+                            var cors = new CorsConfiguration();
+                            cors.addAllowedOrigin("http://localhost:3000");
+                            cors.addAllowedOrigin("http://localhost:5173");
+                            cors.setAllowCredentials(true);
+                            cors.addAllowedMethod("*");
+                            cors.addAllowedHeader("*");
+                            return cors;
+                        })
+                );
 
         return http.build();
     }
-
-//    @Bean
-//    public UserDetailsService userDetailsService(DataSource dataSource) {
-//        return new JdbcUserDetailsManager(dataSource);
-//    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
         return PasswordEncoderFactories.createDelegatingPasswordEncoder();
     }
 
-//    @Bean
-//    public CompromisedPasswordChecker compromisedPasswordChecker() {
-//        return new HaveIBeenPwnedRestApiPasswordChecker();
-//    }
+
 }
