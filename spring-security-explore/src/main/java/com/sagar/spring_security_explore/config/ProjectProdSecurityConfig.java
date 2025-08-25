@@ -1,6 +1,8 @@
 package com.sagar.spring_security_explore.config;
 
 import com.sagar.spring_security_explore.filter.CsrfCookieFilter;
+import com.sagar.spring_security_explore.filter.JwtTokenGeneratorFilter;
+import com.sagar.spring_security_explore.filter.JwtTokenValidatorFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -14,10 +16,12 @@ import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 import org.springframework.web.cors.CorsConfiguration;
 
+import java.util.Arrays;
 import java.util.List;
 
 import static org.springframework.security.config.Customizer.withDefaults;
 import static org.springframework.security.config.http.SessionCreationPolicy.ALWAYS;
+import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
 
 @Configuration
 @Profile("prod") // Only apply this configuration in production profile
@@ -27,10 +31,10 @@ public class ProjectProdSecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         CsrfTokenRequestAttributeHandler csrfTokenRequestAttributeHandler = new CsrfTokenRequestAttributeHandler();
         http
-                .securityContext(ctxConfig -> ctxConfig.requireExplicitSave(false))
-                .sessionManagement(sessionConfig->sessionConfig.sessionCreationPolicy(ALWAYS))
+                .sessionManagement(sessionConfig->sessionConfig.sessionCreationPolicy(STATELESS))
                 .authorizeHttpRequests(requests -> requests
-                        .requestMatchers("/api/admin/**").authenticated()
+                        .requestMatchers("/api/admin/**")
+                        .authenticated()
                         .requestMatchers(
                                 "/api/customers/**",
                                 "/swagger-ui.html",
@@ -47,6 +51,7 @@ public class ProjectProdSecurityConfig {
                             cors.setAllowedOrigins(List.of("http://localhost:3000", "https://localhost:5173"));
                             cors.setAllowedHeaders(List.of("*"));
                             cors.setAllowedMethods(List.of("*"));
+                            cors.setExposedHeaders(Arrays.asList("Authorization"));
                             cors.setAllowCredentials(true);
                             return cors;
                         })
@@ -55,6 +60,8 @@ public class ProjectProdSecurityConfig {
                         csrfConfig.csrfTokenRequestHandler(csrfTokenRequestAttributeHandler)
                                 .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()))
                 .addFilterAfter(new CsrfCookieFilter(), BasicAuthenticationFilter.class)
+                .addFilterAfter(new JwtTokenGeneratorFilter(), BasicAuthenticationFilter.class)
+                .addFilterBefore(new JwtTokenValidatorFilter(), BasicAuthenticationFilter.class)
                 .formLogin(withDefaults())
                 .httpBasic(withDefaults());
 
