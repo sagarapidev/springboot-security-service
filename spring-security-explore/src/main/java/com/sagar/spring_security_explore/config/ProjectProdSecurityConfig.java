@@ -1,13 +1,19 @@
 package com.sagar.spring_security_explore.config;
 
+import com.sagar.spring_security_explore.auth.CustomProdAuthenticationProvider;
 import com.sagar.spring_security_explore.filter.CsrfCookieFilter;
 import com.sagar.spring_security_explore.filter.JwtTokenGeneratorFilter;
 import com.sagar.spring_security_explore.filter.JwtTokenValidatorFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.ProviderManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -31,11 +37,12 @@ public class ProjectProdSecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         CsrfTokenRequestAttributeHandler csrfTokenRequestAttributeHandler = new CsrfTokenRequestAttributeHandler();
         http
-                .sessionManagement(sessionConfig->sessionConfig.sessionCreationPolicy(STATELESS))
+                .sessionManagement(sessionConfig -> sessionConfig.sessionCreationPolicy(STATELESS))
                 .authorizeHttpRequests(requests -> requests
                         .requestMatchers("/api/admin/**")
                         .authenticated()
                         .requestMatchers(
+                                "/api/jwt/**",
                                 "/api/customers/**",
                                 "/swagger-ui.html",
                                 "/swagger-ui/**",
@@ -56,17 +63,15 @@ public class ProjectProdSecurityConfig {
                             return cors;
                         })
                 )
-                .csrf(csrfConfig->
+                .csrf(csrfConfig ->
                         csrfConfig.csrfTokenRequestHandler(csrfTokenRequestAttributeHandler)
+                                .ignoringRequestMatchers("/api/jwt/**", "/api/customers/**")
                                 .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()))
                 .addFilterAfter(new CsrfCookieFilter(), BasicAuthenticationFilter.class)
                 .addFilterAfter(new JwtTokenGeneratorFilter(), BasicAuthenticationFilter.class)
                 .addFilterBefore(new JwtTokenValidatorFilter(), BasicAuthenticationFilter.class)
                 .formLogin(withDefaults())
                 .httpBasic(withDefaults());
-
-
-
 
 
         return http.build();
@@ -77,5 +82,16 @@ public class ProjectProdSecurityConfig {
         return PasswordEncoderFactories.createDelegatingPasswordEncoder();
     }
 
+
+    @Bean
+    public AuthenticationManager authenticationManager(UserDetailsService userDetailsService, PasswordEncoder passwordEncoder) throws Exception {
+
+        CustomProdAuthenticationProvider authToken = new CustomProdAuthenticationProvider(userDetailsService, passwordEncoder);
+        ProviderManager providerManager = new ProviderManager(authToken);
+        providerManager.setEraseCredentialsAfterAuthentication(false);
+        return providerManager;
+
+
+    }
 
 }
